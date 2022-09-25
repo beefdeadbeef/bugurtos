@@ -94,12 +94,6 @@ sMMM+........................-hmMo/ds  oMo`.-o     :h   s:`h` `Nysd.-Ny-h:......
 */
 #define BGRT_SYS_CPACR 	*((volatile unsigned long *) 0xE000ED88)
 
-#define BGRT_SYST_CSR 	*((volatile unsigned long *) 0xE000E010)
-#define BGRT_SYST_RVR 	*((volatile unsigned long *) 0xE000E014)
-
-#define BGRT_SYST_RVR_VALUE ((BGRT_CONFIG_FCPU_HZ / BGRT_CONFIG_FSYSTICK_HZ)- 1ul)
-#define BGRT_SYST_CSR_VALUE (0x00000007)/* Enable clock, interrupt, timer. */
-
 #define BGRT_PENDSV_SET   (0x10000000)
 #define BGRT_PENDSV_CLR   (0x08000000)
 #define BGRT_FPU_ENABLE   (0x00f00000)
@@ -112,18 +106,6 @@ sMMM+........................-hmMo/ds  oMo`.-o     :h   s:`h` `Nysd.-Ny-h:......
 #ifndef __VFP_FP__
 #error "THis works only on FPU enabled devices (Cotrex(tm)-M4F)!!!"
 #endif
-
-#ifndef BGRT_CONFIG_FCPU_HZ
-#error "You must define BGRT_CONFIG_FCPU_HZ macro!!!"
-#endif /*BGRT_CONFIG_FCPU_HZ*/
-
-#ifndef BGRT_CONFIG_FSYSTICK_HZ
-#error "You must define BGRT_CONFIG_FSYSTICK_HZ macro!!!"
-#endif /*BGRT_CONFIG_FSYSTICK_HZ*/
-
-#if BGRT_SYST_RVR_VALUE > 0xFFFFFFUL
-#error "Impossible SYST_RVR value!!! "
-#endif /*BGRT_SYST_RVR_VALUE*/
 
 #ifndef BGRT_CONFIG_PRIO_BITS
 #error "You must define BGRT_CONFIG_PRIO_BITS macro!!!"
@@ -251,10 +233,6 @@ void bgrt_init(void)
     /* Устанавливаем приоритеты обработчиков прерываний; */
     BGRT_SYS_SHPR3 |= (BGRT_CONFIG_SCHED_PRIO  << (8 - BGRT_CONFIG_PRIO_BITS)) << 16; /* PendSV */
     BGRT_SYS_SHPR3 |= (BGRT_CONFIG_SCHED_PRIO  << (8 - BGRT_CONFIG_PRIO_BITS)) << 24; /* SysTick */
-    /* Настраиваем системный таймер и приоритет его прерывания */
-    BGRT_SYST_RVR = BGRT_SYST_RVR_VALUE;
-    BGRT_SYST_CSR = BGRT_SYST_CSR_VALUE;
-
 }
 /*====================================================================================*/
 void bgrt_start(void)
