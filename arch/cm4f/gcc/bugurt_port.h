@@ -81,6 +81,13 @@ sMMM+........................-hmMo/ds  oMo`.-o     :h   s:`h` `Nysd.-Ny-h:......
 BGRT_CDECL_BEGIN
 
 /*====================================================================================*/
+#define BGRT_SYS_ICSR		SCB_ICSR
+#define BGRT_SYS_CPACR		SCB_CPACR
+
+#define BGRT_PENDSV_SET		SCB_ICSR_PENDSVSET
+#define BGRT_PENDSV_CLR		SCB_ICSR_PENDSVCLR
+
+/*====================================================================================*/
 #define BGRT_INT_DIS()     \
 	__asm__ __volatile__ ( \
 		"dsb     \n\t"     \
