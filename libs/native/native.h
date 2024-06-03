@@ -45,6 +45,7 @@ static inline bgrt_prio_t bgrt_proc_get_prio(BGRT_PID_T pid)/*!< \~russian Пр�
 #include "sem.h"
 #include "mutex.h"
 #include "cond.h"
+#include "queue.h"
 
 BGRT_CDECL_END
 #endif /*NATIVE_H*/

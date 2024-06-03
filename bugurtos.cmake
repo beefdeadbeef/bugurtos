@@ -101,6 +101,7 @@ if (NOT TARGET _bugurtos_inclusion_guard)
                 "${BGRT_DIR}/libs/native/ipc.c"
                 "${BGRT_DIR}/libs/native/mutex.c"
                 "${BGRT_DIR}/libs/native/sem.c"
+                "${BGRT_DIR}/libs/native/queue.c"
                 )
         target_include_directories(bugurtos_native_api INTERFACE 
                 ${BGRT_KERNEL_INCLUDES}
