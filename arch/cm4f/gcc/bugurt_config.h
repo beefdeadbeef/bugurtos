@@ -34,8 +34,8 @@ typedef volatile unsigned long bgrt_syscall_t;
 #define BGRT_SYSCALL_ISR		pend_sv_handler
 
 #define BGRT_CONFIG_PRIO_BITS		4
-#define BGRT_CONFIG_SYSCALL_PRIO 	14
-#define BGRT_CONFIG_CRITSEC_PRIO 	15
+#define BGRT_CONFIG_SYSCALL_PRIO 	12
+#define BGRT_CONFIG_CRITSEC_PRIO 	13
 #define BGRT_CONFIG_SCHED_PRIO		15
 
 #define BGRT_PROC_STACK_SIZE		128
