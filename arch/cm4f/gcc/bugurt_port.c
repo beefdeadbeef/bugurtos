@@ -86,10 +86,6 @@ sMMM+........................-hmMo/ds  oMo`.-o     :h   s:`h` `Nysd.-Ny-h:......
 #define BGRT_CURR_PROC bgrt_kernel.sched.current_proc
 
 /*====================================================================================*/
-#ifndef __VFP_FP__
-#error "THis works only on FPU enabled devices (Cotrex(tm)-M4F)!!!"
-#endif
-
 #ifndef BGRT_CONFIG_PRIO_BITS
 #error "You must define BGRT_CONFIG_PRIO_BITS macro!!!"
 #endif /*BGRT_CONFIG_PRIO_BITS*/
@@ -102,27 +98,45 @@ sMMM+........................-hmMo/ds  oMo`.-o     :h   s:`h` `Nysd.-Ny-h:......
 #error "BGRT_CONFIG_SCHED_PRIO must be greater or equal to BGRT_CONFIG_CRITSEC_PRIO !!!"
 #endif /*BGRT_CONFIG_SCHED_PRIO*/
 /*====================================================================================*/
+#ifdef __ARM_FP
 volatile bgrt_stack_t bugurt_kernel_stack[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+#else
+volatile bgrt_stack_t bugurt_kernel_stack[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+#endif
 /*====================================================================================*/
+#ifdef __ARM_FP
+#define FPU_CONTEXT_STORE		\
+	"tst r14, #0x10          \n\t"	\
+	"it eq                   \n\t"	\
+	"vstmdbeq r0!, {s16-s31} \n\t"
+#else
+#define FPU_CONTEXT_STORE
+#endif
+
 #define BGRT_CONTEXT_STORE() \
 	__asm__ __volatile__ (               \
 				"mrs r0, psp             \n\t"\
-				"tst r14, #0x10          \n\t"\
-				"it eq                   \n\t"\
-				"vstmdbeq r0!, {s16-s31} \n\t"\
+				FPU_CONTEXT_STORE	      \
 				"stmdb r0!, {r4-r11,lr}  \n\t"\
 				"msr psp, r0             \n\t"\
 				"dsb                     \n\t"\
 				"isb                     \n\t"\
 				:::)
 /*====================================================================================*/
+#ifdef __ARM_FP
+#define FPU_CONTEXT_LOAD		\
+	"tst r14, #0x10          \n\t"	\
+	"it eq                   \n\t"	\
+	"vldmiaeq r0!, {s16-s31} \n\t"
+#else
+#define FPU_CONTEXT_LOAD
+#endif
+
 #define BGRT_CONTEXT_LOAD() \
 	__asm__ __volatile__ (               \
 				"mrs r0, psp             \n\t"\
 				"ldmfd r0!, {r4-r11,lr}  \n\t"\
-				"tst r14, #0x10          \n\t"\
-				"it eq                   \n\t"\
-				"vldmiaeq r0!, {s16-s31} \n\t"\
+				FPU_CONTEXT_LOAD              \
 				"msr psp, r0             \n\t"\
 				"dsb                     \n\t"\
 				"isb                     \n\t"\
@@ -212,7 +226,11 @@ void bgrt_init(void)
 	BGRT_INT_DIS();
     bgrt_kernel_init();
     /* Устанавливаем начальное значение PSP, для процесса потока Ядра; */
+#ifdef __ARM_FP
     _write_psp((volatile bgrt_stack_t *)&bugurt_kernel_stack[32]); /* !!! Внимательно смотрим на границы!!! */
+#else
+    _write_psp((volatile bgrt_stack_t *)&bugurt_kernel_stack[16]);
+#endif
     /* Устанавливаем приоритеты обработчиков прерываний; */
     BGRT_SYS_SHPR3 |= (BGRT_CONFIG_SCHED_PRIO  << (8 - BGRT_CONFIG_PRIO_BITS)) << 16; /* PendSV */
     BGRT_SYS_SHPR3 |= (BGRT_CONFIG_SCHED_PRIO  << (8 - BGRT_CONFIG_PRIO_BITS)) << 24; /* SysTick */
